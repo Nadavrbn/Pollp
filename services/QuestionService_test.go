@@ -26,7 +26,7 @@ func (m *mockIQuestionRepository) GetQuestions() []models.Question {
 
 func (m *mockIQuestionRepository) GetQuestion(id uint32) (models.Question, error) {
 	for _, q := range m.questions {
-		if q.Id == id {
+		if q.PublicId == id {
 			return q, nil
 		}
 	}
@@ -37,7 +37,7 @@ func TestQuestionService_CreateQuestion(t *testing.T) {
 	// Prepare
 	repo := &mockIQuestionRepository{}
 	service := NewQuestionService(repo)
-	question := models.Question{Id: 1, Title: "What's your favorite color?"}
+	question := models.Question{PublicId: 1, Title: "What's your favorite color?"}
 
 	// Execute
 	createdQuestion, err := service.CreateQuestion(question)
@@ -53,8 +53,8 @@ func TestQuestionService_GetQuestions(t *testing.T) {
 	repo := &mockIQuestionRepository{}
 	service := NewQuestionService(repo)
 	questions := []models.Question{
-		{Id: 1, Title: "Question 1"},
-		{Id: 2, Title: "Question 2"},
+		{PublicId: 1, Title: "Question 1"},
+		{PublicId: 2, Title: "Question 2"},
 	}
 	repo.questions = questions
 
@@ -69,7 +69,7 @@ func TestQuestionService_GetQuestionById(t *testing.T) {
 	// Prepare
 	repo := &mockIQuestionRepository{}
 	service := NewQuestionService(repo)
-	question := models.Question{Id: 1, Title: "What's your favorite color?"}
+	question := models.Question{PublicId: 1, Title: "What's your favorite color?"}
 	repo.questions = append(repo.questions, question)
 
 	// Execute

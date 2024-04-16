@@ -1,15 +1,15 @@
 package services
 
 import (
+	"pollp/dal"
 	"pollp/models"
-	"pollp/repositories"
 )
 
 type QuestionService struct {
-	IQuestionRepository repositories.IQuestionRepository
+	IQuestionRepository dal.IQuestionRepository
 }
 
-func NewQuestionService(IQuestionRepository repositories.IQuestionRepository) *QuestionService {
+func NewQuestionService(IQuestionRepository dal.IQuestionRepository) *QuestionService {
 	return &QuestionService{IQuestionRepository: IQuestionRepository}
 }
 

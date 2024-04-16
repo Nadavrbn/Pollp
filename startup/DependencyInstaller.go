@@ -1,11 +1,11 @@
-package main
+package startup
 
 import (
 	"go.uber.org/dig"
 	"log"
 	"pollp/controllers"
+	"pollp/dal"
 	"pollp/gin"
-	"pollp/repositories"
 	"pollp/services"
 )
 
@@ -18,9 +18,13 @@ type Dependency struct {
 func BuildContainer() *dig.Container {
 	dependencies := []Dependency{
 		{
-			Constructor: repositories.NewInMemoryIQuestionRepository,
-			Interface:   new(repositories.IQuestionRepository),
-			Token:       "InMemoryQuestionRepository",
+			Constructor: dal.NewMongoDatastore,
+			Token:       "MongoDatastore",
+		},
+		{
+			Constructor: dal.NewMongoDBQuestionRepository,
+			Interface:   new(dal.IQuestionRepository),
+			Token:       "MongoDBQuestionRepository",
 		},
 		{
 			Constructor: services.NewQuestionService,
@@ -41,7 +45,13 @@ func BuildContainer() *dig.Container {
 
 	container := dig.New()
 	for _, dep := range dependencies {
-		err := container.Provide(dep.Constructor, dig.As(dep.Interface))
+		var err error
+		if dep.Interface != nil {
+			err = container.Provide(dep.Constructor, dig.As(dep.Interface))
+		} else {
+			err = container.Provide(dep.Constructor)
+		}
+
 		handleError(err)
 	}
 	return container

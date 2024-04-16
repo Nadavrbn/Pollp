@@ -1,9 +1,10 @@
 package models
 
 type Question struct {
-	Id        uint32   `json:"id"`
-	Title     string   `json:"title"`
-	Responses Response `json:"responses"`
+	Id        interface{} `json:"-"`
+	PublicId  uint32      `json:"id"`
+	Title     string      `json:"title"`
+	Responses Response    `json:"responses"`
 }
 
 type Response struct {
