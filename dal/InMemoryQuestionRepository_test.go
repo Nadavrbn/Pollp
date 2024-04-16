@@ -10,7 +10,7 @@ import (
 func TestInMemoryIQuestionRepository_CreateQuestion(t *testing.T) {
 	repo := NewInMemoryIQuestionRepository()
 
-	newQuestion := models.Question{PublicId: 5, Title: "How much wood would a woodchuck chuck if a woodchuck could chuck wood?"}
+	newQuestion := models.Question{PublicId: "5", Title: "How much wood would a woodchuck chuck if a woodchuck could chuck wood?"}
 	createdQuestion, err := repo.CreateQuestion(newQuestion)
 
 	assert.NoError(t, err, "Error should be nil")
@@ -21,7 +21,7 @@ func TestInMemoryIQuestionRepository_CreateQuestion(t *testing.T) {
 func TestInMemoryIQuestionRepository_CreateQuestion_IdAlreadyExists(t *testing.T) {
 	repo := NewInMemoryIQuestionRepository()
 
-	newQuestion := models.Question{PublicId: 2, Title: "How much wood would a woodchuck chuck if a woodchuck could chuck wood?"}
+	newQuestion := models.Question{PublicId: "2", Title: "How much wood would a woodchuck chuck if a woodchuck could chuck wood?"}
 	createdQuestion, err := repo.CreateQuestion(newQuestion)
 
 	assert.Error(t, err, "An error should occur")
@@ -41,8 +41,8 @@ func TestInMemoryIQuestionRepository_GetQuestions(t *testing.T) {
 func TestInMemoryIQuestionRepository_GetQuestion(t *testing.T) {
 	repo := NewInMemoryIQuestionRepository()
 
-	expectedQuestion := models.Question{PublicId: 1, Title: "Where should we go for lunch?"}
-	question, err := repo.GetQuestion(1)
+	expectedQuestion := models.Question{PublicId: "1", Title: "Where should we go for lunch?"}
+	question, err := repo.GetQuestion("1")
 
 	assert.NoError(t, err, "Error should be nil")
 
@@ -52,7 +52,7 @@ func TestInMemoryIQuestionRepository_GetQuestion(t *testing.T) {
 func TestInMemoryIQuestionRepository_GetQuestion_NotFound(t *testing.T) {
 	repo := NewInMemoryIQuestionRepository()
 
-	question, err := repo.GetQuestion(100)
+	question, err := repo.GetQuestion("100")
 
 	assert.Error(t, err, "An error should occur")
 	assert.EqualError(t, err, "question with id 100 not found", "Error message should indicate question not found")

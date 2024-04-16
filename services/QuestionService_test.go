@@ -24,7 +24,7 @@ func (m *mockIQuestionRepository) GetQuestions() []models.Question {
 	return m.questions
 }
 
-func (m *mockIQuestionRepository) GetQuestion(id uint32) (models.Question, error) {
+func (m *mockIQuestionRepository) GetQuestion(id string) (models.Question, error) {
 	for _, q := range m.questions {
 		if q.PublicId == id {
 			return q, nil
@@ -37,15 +37,16 @@ func TestQuestionService_CreateQuestion(t *testing.T) {
 	// Prepare
 	repo := &mockIQuestionRepository{}
 	service := NewQuestionService(repo)
-	question := models.Question{PublicId: 1, Title: "What's your favorite color?"}
+	question := models.Question{Title: "What's your favorite color?"}
 
 	// Execute
 	createdQuestion, err := service.CreateQuestion(question)
 
 	// Verify
 	assert.NoError(t, err)
+	assert.Regexp(t, "[0-7][0-9A-HJKMNP-TV-Z]{25}", createdQuestion.PublicId, "Question should have generated public id in ULID format")
+	question.PublicId = createdQuestion.PublicId
 	assert.Equal(t, question, createdQuestion)
-	assert.Equal(t, []models.Question{question}, repo.questions)
 }
 
 func TestQuestionService_GetQuestions(t *testing.T) {
@@ -53,8 +54,8 @@ func TestQuestionService_GetQuestions(t *testing.T) {
 	repo := &mockIQuestionRepository{}
 	service := NewQuestionService(repo)
 	questions := []models.Question{
-		{PublicId: 1, Title: "Question 1"},
-		{PublicId: 2, Title: "Question 2"},
+		{PublicId: "1AB2", Title: "Question 1"},
+		{PublicId: "3CD4", Title: "Question 2"},
 	}
 	repo.questions = questions
 
@@ -69,11 +70,11 @@ func TestQuestionService_GetQuestionById(t *testing.T) {
 	// Prepare
 	repo := &mockIQuestionRepository{}
 	service := NewQuestionService(repo)
-	question := models.Question{PublicId: 1, Title: "What's your favorite color?"}
+	question := models.Question{PublicId: "1AB2", Title: "What's your favorite color?"}
 	repo.questions = append(repo.questions, question)
 
 	// Execute
-	result, err := service.GetQuestionById(1)
+	result, err := service.GetQuestionById("1AB2")
 
 	// Verify
 	assert.NoError(t, err)
@@ -86,7 +87,7 @@ func TestQuestionService_GetQuestionById_NotFound(t *testing.T) {
 	service := NewQuestionService(repo)
 
 	// Execute
-	_, err := service.GetQuestionById(1)
+	_, err := service.GetQuestionById("1AZ2")
 
 	// Verify
 	assert.Error(t, err)

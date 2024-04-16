@@ -59,7 +59,7 @@ func (r *MongoDBQuestionRepository) GetQuestions() []models.Question {
 }
 
 // GetQuestion retrieves a question by its ID from the MongoDB collection.
-func (r *MongoDBQuestionRepository) GetQuestion(id uint32) (models.Question, error) {
+func (r *MongoDBQuestionRepository) GetQuestion(id string) (models.Question, error) {
 	var question models.Question
 
 	filter := bson.M{"publicId": id}

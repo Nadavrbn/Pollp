@@ -6,7 +6,6 @@ import (
 	"pollp/controllers/utils"
 	"pollp/models"
 	"pollp/services"
-	"strconv"
 )
 
 type IQuestionController interface {
@@ -31,13 +30,13 @@ func (qc *QuestionController) GetQuestions(c *gin.Context) {
 }
 
 func (qc *QuestionController) GetQuestion(c *gin.Context) {
-	id, err := strconv.ParseUint(c.Param("id"), 10, 32)
+	id := c.Param("id")
 
-	if err != nil {
+	if id == "" {
 		c.AbortWithStatus(http.StatusBadRequest)
 	}
 
-	result, err := qc.questionService.GetQuestionById(uint32(id))
+	result, err := qc.questionService.GetQuestionById(id)
 
 	if err != nil {
 		stop := utils.HandleControllerError(err, c)
