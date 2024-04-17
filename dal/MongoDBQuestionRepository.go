@@ -3,6 +3,7 @@ package dal
 import (
 	"context"
 	"errors"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"pollp/models"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -72,4 +73,38 @@ func (r *MongoDBQuestionRepository) GetQuestion(id string) (models.Question, err
 	}
 
 	return question, nil
+}
+
+func (r *MongoDBQuestionRepository) AddVote(questionId, answerId string) (models.Question, error) {
+	return changeAnswerCount(r, questionId, answerId, 1)
+}
+
+func (r *MongoDBQuestionRepository) RemoveVote(questionId, answerId string) (models.Question, error) {
+	return changeAnswerCount(r, questionId, answerId, -1)
+}
+
+func changeAnswerCount(r *MongoDBQuestionRepository, questionId string, answerId string, amount int) (models.Question, error) {
+	filter := bson.M{
+		"responses.publicid": answerId,
+		"publicid":           questionId,
+	}
+
+	update := bson.M{
+		"$inc": bson.M{
+			"responses.$.votes": amount,
+		},
+	}
+
+	opts := options.FindOneAndUpdate().SetReturnDocument(options.After)
+
+	var updatedQuestion models.Question
+	err := r.collection.FindOneAndUpdate(context.Background(), filter, update, opts).Decode(&updatedQuestion)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return models.Question{}, errors.New("question or answer not found")
+		}
+		return models.Question{}, err
+	}
+
+	return updatedQuestion, nil
 }

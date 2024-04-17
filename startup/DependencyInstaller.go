@@ -37,6 +37,11 @@ func BuildContainer() *dig.Container {
 			Token:       "QuestionController",
 		},
 		{
+			Constructor: controllers.NewVoteController,
+			Interface:   new(controllers.IVoteController),
+			Token:       "VoteController",
+		},
+		{
 			Constructor: gin.NewPollpServer,
 			Interface:   new(gin.IPollpServer),
 			Token:       "PollpServer",

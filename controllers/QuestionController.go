@@ -33,7 +33,8 @@ func (qc *QuestionController) GetQuestion(c *gin.Context) {
 	id := c.Param("id")
 
 	if id == "" {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
+		return
 	}
 
 	result, err := qc.questionService.GetQuestionById(id)
@@ -53,7 +54,7 @@ func (qc *QuestionController) CreateQuestion(c *gin.Context) {
 	err := c.BindJSON(&question)
 
 	if err != nil {
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.Status(http.StatusBadRequest)
 		return
 	}
 

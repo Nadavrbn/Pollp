@@ -7,11 +7,11 @@ import (
 )
 
 type QuestionService struct {
-	IQuestionRepository dal.IQuestionRepository
+	QuestionRepository dal.IQuestionRepository
 }
 
 func NewQuestionService(IQuestionRepository dal.IQuestionRepository) *QuestionService {
-	return &QuestionService{IQuestionRepository: IQuestionRepository}
+	return &QuestionService{QuestionRepository: IQuestionRepository}
 }
 
 func (s *QuestionService) CreateQuestion(question models.Question) (models.Question, error) {
@@ -19,13 +19,19 @@ func (s *QuestionService) CreateQuestion(question models.Question) (models.Quest
 	for i := 0; i < len(question.Responses); i++ {
 		question.Responses[i].PublicId = ulid.Make().String()
 	}
-	return s.IQuestionRepository.CreateQuestion(question)
+	return s.QuestionRepository.CreateQuestion(question)
 }
 
 func (s *QuestionService) GetQuestions() []models.Question {
-	return s.IQuestionRepository.GetQuestions()
+	return s.QuestionRepository.GetQuestions()
 }
 
 func (s *QuestionService) GetQuestionById(id string) (models.Question, error) {
-	return s.IQuestionRepository.GetQuestion(id)
+	return s.QuestionRepository.GetQuestion(id)
+}
+func (s *QuestionService) AddVote(questionId string, answerId string) (models.Question, error) {
+	return s.QuestionRepository.AddVote(questionId, answerId)
+}
+func (s *QuestionService) RemoveVote(questionId string, answerId string) (models.Question, error) {
+	return s.QuestionRepository.RemoveVote(questionId, answerId)
 }

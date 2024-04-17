@@ -12,9 +12,9 @@ func HandleControllerError(err error, c *gin.Context) bool {
 		var httpError *models.HttpError
 		switch {
 		case errors.As(err, &httpError):
-			c.AbortWithStatus(httpError.HttpStatusCode)
+			c.Status(httpError.HttpStatusCode)
 		default:
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.Status(http.StatusInternalServerError)
 		}
 	}
 
