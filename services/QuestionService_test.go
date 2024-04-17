@@ -1,48 +1,30 @@
-package services
+package services_test
 
 import (
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"pollp/models"
 	"testing"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/assert"
+
+	mocks "pollp/mocks"
+	"pollp/models"
+	"pollp/services"
 )
 
-type mockIQuestionRepository struct {
-	questions []models.Question
-	err       error
-}
-
-func (m *mockIQuestionRepository) CreateQuestion(question models.Question) (models.Question, error) {
-	if m.err != nil {
-		return models.Question{}, m.err
-	}
-	m.questions = append(m.questions, question)
-	return question, nil
-}
-
-func (m *mockIQuestionRepository) GetQuestions() []models.Question {
-	return m.questions
-}
-
-func (m *mockIQuestionRepository) GetQuestion(id string) (models.Question, error) {
-	for _, q := range m.questions {
-		if q.PublicId == id {
-			return q, nil
-		}
-	}
-	return models.Question{}, errors.New("question not found")
-}
-
 func TestQuestionService_CreateQuestion(t *testing.T) {
-	// Prepare
-	repo := &mockIQuestionRepository{}
-	service := NewQuestionService(repo)
-	question := models.Question{Title: "What's your favorite color?"}
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	// Execute
+	mockRepo := mocks.NewMockIQuestionRepository(ctrl)
+	service := services.NewQuestionService(mockRepo)
+
+	question := models.Question{Title: "What's your favorite color?"}
+	mockRepo.EXPECT().CreateQuestion(gomock.Any()).DoAndReturn(func(q models.Question) (models.Question, error) {
+		return q, nil
+	})
 	createdQuestion, err := service.CreateQuestion(question)
 
-	// Verify
 	assert.NoError(t, err)
 	assert.Regexp(t, "[0-7][0-9A-HJKMNP-TV-Z]{25}", createdQuestion.PublicId, "Question should have generated public id in ULID format")
 	question.PublicId = createdQuestion.PublicId
@@ -50,46 +32,90 @@ func TestQuestionService_CreateQuestion(t *testing.T) {
 }
 
 func TestQuestionService_GetQuestions(t *testing.T) {
-	// Prepare
-	repo := &mockIQuestionRepository{}
-	service := NewQuestionService(repo)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockIQuestionRepository(ctrl)
+	service := services.NewQuestionService(mockRepo)
+
 	questions := []models.Question{
 		{PublicId: "1AB2", Title: "Question 1"},
 		{PublicId: "3CD4", Title: "Question 2"},
 	}
-	repo.questions = questions
+	mockRepo.EXPECT().GetQuestions().Return(questions)
 
-	// Execute
 	result := service.GetQuestions()
 
-	// Verify
 	assert.Equal(t, questions, result)
 }
 
 func TestQuestionService_GetQuestionById(t *testing.T) {
-	// Prepare
-	repo := &mockIQuestionRepository{}
-	service := NewQuestionService(repo)
-	question := models.Question{PublicId: "1AB2", Title: "What's your favorite color?"}
-	repo.questions = append(repo.questions, question)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	// Execute
+	mockRepo := mocks.NewMockIQuestionRepository(ctrl)
+	service := services.NewQuestionService(mockRepo)
+
+	question := models.Question{PublicId: "1AB2", Title: "What's your favorite color?"}
+	mockRepo.EXPECT().GetQuestion("1AB2").Return(question, nil)
+
 	result, err := service.GetQuestionById("1AB2")
 
-	// Verify
 	assert.NoError(t, err)
 	assert.Equal(t, question, result)
 }
 
 func TestQuestionService_GetQuestionById_NotFound(t *testing.T) {
-	// Prepare
-	repo := &mockIQuestionRepository{}
-	service := NewQuestionService(repo)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	// Execute
+	mockRepo := mocks.NewMockIQuestionRepository(ctrl)
+	service := services.NewQuestionService(mockRepo)
+
+	mockRepo.EXPECT().GetQuestion("1AZ2").Return(models.Question{}, errors.New("question not found"))
+
 	_, err := service.GetQuestionById("1AZ2")
 
-	// Verify
 	assert.Error(t, err)
 	assert.EqualError(t, err, "question not found")
+}
+
+func TestQuestionService_AddVote(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockIQuestionRepository(ctrl)
+	service := services.NewQuestionService(mockRepo)
+
+	questionID := "01HVKXMHJ08YX357CJDC11A41B"
+	answerID := "01HVKXMHJ08YX357CJDC8WVYE1"
+	expectedQuestion := models.Question{ /* construct expected question */ }
+	mockRepo.EXPECT().AddVote(questionID, answerID).DoAndReturn(func(qID, aID string) (models.Question, error) {
+		return expectedQuestion, nil
+	})
+
+	result, err := service.AddVote(questionID, answerID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedQuestion, result)
+}
+
+func TestQuestionService_RemoveVote(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockRepo := mocks.NewMockIQuestionRepository(ctrl)
+	service := services.NewQuestionService(mockRepo)
+
+	questionID := "01HVKXMHJ08YX357CJDC11A41B"
+	answerID := "01HVKXMHJ08YX357CJDC8WVYE1"
+	expectedQuestion := models.Question{ /* construct expected question */ }
+	mockRepo.EXPECT().RemoveVote(questionID, answerID).DoAndReturn(func(qID, aID string) (models.Question, error) {
+		return expectedQuestion, nil
+	})
+
+	result, err := service.RemoveVote(questionID, answerID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedQuestion, result)
 }
