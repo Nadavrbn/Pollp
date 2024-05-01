@@ -89,7 +89,7 @@ func TestQuestionService_AddVote(t *testing.T) {
 
 	questionID := "01HVKXMHJ08YX357CJDC11A41B"
 	answerID := "01HVKXMHJ08YX357CJDC8WVYE1"
-	expectedQuestion := models.Question{ /* construct expected question */ }
+	expectedQuestion := models.Question{}
 	mockRepo.EXPECT().AddVote(questionID, answerID).DoAndReturn(func(qID, aID string) (models.Question, error) {
 		return expectedQuestion, nil
 	})
@@ -109,7 +109,7 @@ func TestQuestionService_RemoveVote(t *testing.T) {
 
 	questionID := "01HVKXMHJ08YX357CJDC11A41B"
 	answerID := "01HVKXMHJ08YX357CJDC8WVYE1"
-	expectedQuestion := models.Question{ /* construct expected question */ }
+	expectedQuestion := models.Question{}
 	mockRepo.EXPECT().RemoveVote(questionID, answerID).DoAndReturn(func(qID, aID string) (models.Question, error) {
 		return expectedQuestion, nil
 	})
