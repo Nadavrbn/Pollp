@@ -1,6 +1,0 @@
-{
-  "connectionStrings" : {
-    "mongoConnectionString": "mongodb://admin:aaa123@localhost:27017",
-    "database": "pollp_dev"
-  }
-}
