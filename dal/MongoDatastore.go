@@ -45,7 +45,6 @@ func connectToMongo() (a *mongo.Database, b *mongo.Client) {
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v on %v", db, uri)
-		//panic(err)
 	}
 
 	return client.Database(db), client
