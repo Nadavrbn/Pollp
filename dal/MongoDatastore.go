@@ -2,10 +2,12 @@ package dal
 
 import (
 	"context"
+	"log"
+	"sync"
+
 	"github.com/spf13/viper"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"sync"
 )
 
 type MongoDatastore struct {
@@ -42,8 +44,8 @@ func connectToMongo() (a *mongo.Database, b *mongo.Client) {
 	db := viper.GetString("connectionStrings.database")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
-		//log.Fatalf("Failed to connect to database: %v", db)
-		panic(err)
+		log.Fatalf("Failed to connect to database: %v on %v", db, uri)
+		//panic(err)
 	}
 
 	return client.Database(db), client
